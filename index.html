@@ -1,13 +1,30 @@
 <html>
 	<head>
 		<title>VoicePong JS</title>
+		<style>
+
+			html, body{
+				margin:0;
+				padding:0;
+				background:#45c1d7;
+			}
+
+			canvas{
+				background:#45c1d7;
+				border-top:15px solid #fff;
+				border-bottom:15px solid #fff;
+				margin:50px auto;
+				float:none;
+				display:block;
+			}
+
+		</style>
 	</head>
 	<body>
 		
-		<canvas id="theCanvas" style="background:#2d2d2d" width="800" height="600"></canvas>
-
+		<canvas id="game" width="1152" height="720"></canvas>
 		<script src="js/libs/easel.js"></script>
+		<script src="js/mic.js"></script>
 		<script src="js/canvas.js"></script>
-
 	</body>
 </html>

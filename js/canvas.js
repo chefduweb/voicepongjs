@@ -1,6 +1,6 @@
 
 
-	var Game = new function(){
+	var Game = function(){
 
 
 		var canvas;
@@ -13,31 +13,30 @@
 		var brick;
 		var scoreLeft;
 		var scoreRight;
+		var scores;
 
 
 		this.init = function(){
 
 			var self = this;
-			self.canvas = new createjs.Stage( document.getElementById( "theCanvas" ) );
+			self.canvas = new createjs.Stage( document.getElementById( "game" ) );
 
 			//set constants:
-			self._x = 800;
-			self._y = 600;
-			self.speedX = 10;
-			self.speedY = 10;
+			self._x = 1152;
+			self._y = 720;
+			self.speedX = 15;
+			self.speedY = 15;
 
-			//set random starting speedX
-			if( Math.random() > .5 )
-				self.speedX *= -1;
 
-			//set random starting speedY
-			if( Math.random() > .5 )
-				self.speedY *= -1;
-		
+			self.rollSpeed();
+
+			self.setScoreBoard();
 
 			self.setPaddles();
 
-			self.setBrick();			
+			self.setBrick();
+
+
 
 			//update the canvas with the set paddles.
 			self.update();
@@ -45,6 +44,49 @@
 
 		}
 
+		/**********************************************/
+		/********    SCORE  *************************/
+		/**********************************************/
+
+		this.setScoreBoard = function(){
+
+			var self = this;
+
+			self.scores = [];
+			self.scores['left'] = 0;
+			self.scores['right'] = 0;
+
+			self.scoreLeft = new createjs.Text( self.scores['left'], "55px Impact", "#ffffff" );
+			self.scoreRight = new createjs.Text( self.scores['right'], "55px Impact", "#ffffff" );
+			self.scoreLeft.y = self.scoreRight.y = 80;
+
+			self.scoreRight.x = self._x - 150;
+			self.scoreLeft.x = 150;
+
+			self.canvas.addChild( self.scoreLeft );
+			self.canvas.addChild( self.scoreRight );
+
+
+		}
+
+
+		this.upScore = function( type ){
+
+			var self = this;
+
+			//up the score:
+			if( type === 'left' ){
+				self.scores['left'] += 1;
+				self.scoreLeft.text = self.scores['left'];
+			}else{
+				self.scores['right'] += 1;
+				self.scoreRight.text = self.scores['right'];
+			}
+
+
+
+			self.resetBrick();
+		}
 
 
 
@@ -70,7 +112,40 @@
 			self.canvas.addChild( self.brick );
 
 			self.updateBrick();
+		}
 
+
+		/**
+		 * Reset the brick after scoring
+		 * 
+		 * @return void
+		 */
+		this.resetBrick = function(){
+
+			var self = this;
+
+			self.rollSpeed();
+			self.brick.x = ( self._x / 2 ) - 10;
+			self.brick.y = ( self._y / 2 ) - 10;
+		}
+
+
+		/**
+		 * roll some dice to see which direction the brick will take:
+		 * 
+		 * @return void
+		 */
+		this.rollSpeed = function(){
+
+			var self = this;
+
+			//set random starting speedX
+			if( Math.random() > .5 )
+				self.speedX *= -1;
+
+			//set random starting speedY
+			if( Math.random() > .5 )
+				self.speedY *= -1;
 		}
 
 
@@ -102,8 +177,6 @@
 				if( self.checkIntersection( self.paddleLeft, self.brick ) )
 					self.speedX *= -1;
 
-				console.log( self.paddleLeft.y );
-
 				//right paddle check:
 				if( self.checkIntersection( self.paddleRight, self.brick ) )
 					self.speedX *= -1;
@@ -113,6 +186,14 @@
 				self.brick.x += self.speedX;
 				self.brick.y += self.speedY;
 
+
+				//up the score if the bricks' x is low or high enough:
+				if( self.brick.x <= 0 ){
+					self.upScore( 'right' );
+				}else if( self.brick.x >= self._x ){
+					self.upScore( 'left' );
+				}
+				
 				self.update();
 
 			});
@@ -176,7 +257,7 @@
 			self.paddleLeft.x = 10;
 
 			self.paddleRight = self.drawPaddle( 'right' );
-			self.paddleRight.x = 770;
+			self.paddleRight.x = self._x - 25;
 
 			self.paddleLeft.y = self.paddleRight.y = 250;
 
@@ -264,12 +345,12 @@
 
 			var self = this;
 			var sprite = new createjs.Shape();
-			sprite.setBounds( 0, 0, 15, 70 );
+			sprite.setBounds( 0, 0, 15, 270 );
 
 			var g = sprite.graphics;
 
 			g.beginFill('#ffffff');
-			g.drawRect( 0, 0, 15, 70 );
+			g.drawRect( 0, 0, 15, 270 );
 			g.endFill();
 
 			return sprite;
@@ -304,6 +385,10 @@
 
 	window.onload = function(){
 
-		Game.init();
+		window.game = new Game();
+		window.game.init();
+
+		window.mic = new Mic();
+		window.mic.init();
 
 	}
