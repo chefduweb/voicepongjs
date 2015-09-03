@@ -97,7 +97,7 @@ var Mic = new function(){
                           navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
     if (navigator.webkitGetUserMedia){
-        navigator.webkitGetUserMedia({audio:true, video:false}, function( e ){
+        navigator.webkitGetUserMedia({ audio: { optional: [{ echoCancellation: false }] } }, function( e ){
 
 
            // creates the audio context
@@ -116,26 +116,26 @@ var Mic = new function(){
             // connect the stream to the gain node
             audioInput.connect(volume);
 
+
             var bufferSize = 2048;
             recorder = context.createScriptProcessor(bufferSize, 2, 2);
+            recorder.connect( context.destination );
 
-            console.log( recorder );
             recorder.onaudioprocess = function(e){
-                console.log ('recording');
+
                 var left = e.inputBuffer.getChannelData (0);
                 var right = e.inputBuffer.getChannelData (1);
 
-                pitch = autoCorrelate( left, sampleRate   );
-                console.log( 'left: '+ pitch );
+                leftPitch = autoCorrelate( leftData, sampleRate   );
+                console.log( 'left: '+ leftPitch );
 
-                pitch = autoCorrelate( right, sampleRate   );
-                console.log( 'right: '+ pitch );
+                rightPitch = autoCorrelate( rightData, sampleRate   );
+                console.log( 'right: '+ rightPitch );
 
             }
 
             // we connect the recorder
             volume.connect (recorder);
-            //recorder.connect (context.destination); 
       
 
 
@@ -146,6 +146,7 @@ var Mic = new function(){
     } else alert('getUserMedia not supported in this browser.');
   
     console.log( 'init ran' );
+    
   }
 
 
