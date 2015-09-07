@@ -44,10 +44,16 @@ var Mic = function(){
                 var rightData = new Float32Array( right );
     
                 leftPitch = self.autoCorrelate( leftData, sampleRate   );
-                console.log( 'left: '+ leftPitch );
+                // console.log( 'left: '+ leftPitch );
     
                 rightPitch = self.autoCorrelate( rightData, sampleRate   );
-                console.log( 'right: '+ rightPitch );
+                // console.log( 'right: '+ rightPitch );
+                if (leftPitch > 0) {
+                    window.game.voiceControlPaddle(leftPitch, 'left');
+                }
+                if (rightPitch > 0) {
+                    window.game.voiceControlPaddle(rightPitch, 'right');
+                }
     
             }
 
