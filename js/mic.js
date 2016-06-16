@@ -79,18 +79,18 @@ var Mic = function(){
      * @param  Int sampleRate
      * @return Float
      */
-    this.autoCorrelate = function (audioBuffer, sampleRate) {
+    this.autoCorrelate = function( audioBuffer, sampleRate ){
 
         var self = this;
-        var SIZE = audioBuffer.length;
-        var MAX_SAMPLES = Math.floor(SIZE / 2);
-        var MIN_SAMPLES = 0;
+        var size = audioBuffer.length;
+        var maxSamples = Math.floor( size / 2 );
+        var minSamples = 0;
 
         var bestOffset = -1;
         var bestCorrelation = 0;
         var rms = self.calculateRMS( audioBuffer );
         var foundGoodCorrelation = false;
-        var correlations = new Array( MAX_SAMPLES );
+        var correlations = new Array( maxSamples );
         var i;
         var lastCorrelation;
         var offset;
@@ -103,19 +103,24 @@ var Mic = function(){
 
         lastCorrelation = 1;
 
-        for( offset = MIN_SAMPLES; offset < MAX_SAMPLES; offset++ ){
+        //loop through all samples
+        for( offset = minSamples; offset < maxSamples; offset++ ){
+
             correlation = 0;
 
-            for( i = 0; i < MAX_SAMPLES; i++ ){
-                correlation += Math.abs((audioBuffer[i]) - (audioBuffer[i + offset]));
+            //calculate correlation per sample
+            for( i = 0; i < maxSamples; i++ ){
+                correlation += Math.abs( ( audioBuffer[i] ) - ( audioBuffer[i + offset ] ) );
             }
         
-            correlation = 1 - (correlation / MAX_SAMPLES);
+            correlation = 1 - (correlation / maxSamples);
         
-            // store it, for the tweaking we need to do below.
+            //store it, for the tweaking we need to do below.
             correlations[offset] = correlation;
         
+            //we found a matching correlation
             if( ( correlation > 0.9 ) && ( correlation > lastCorrelation ) ){
+                
                 foundGoodCorrelation = true;
                 
                 if (correlation > bestCorrelation) {
@@ -124,7 +129,8 @@ var Mic = function(){
                 }
             
             } else if (foundGoodCorrelation) {
-        
+                
+                //make a best guest on the right correlation based on the best offset
                 var shift = ( correlations[bestOffset + 1] - correlations[bestOffset - 1] ) / correlations[bestOffset];
                 return sampleRate / ( bestOffset + ( 8 * shift ) );
         
@@ -133,19 +139,21 @@ var Mic = function(){
             lastCorrelation = correlation;
         }
 
-        if( bestCorrelation > 0.01 ) {
-
+        //if we've found a positive correlation, return it
+        if( bestCorrelation > 0.01 )
             return sampleRate / bestOffset;
-        }
-
+        
+        
         return -1;
     }
 
 
     /**
-     * [calculateRMS description]
-     * @param  {[type]} audioBuffer [description]
-     * @return {[type]}             [description]
+     * Calculates signal strength by using the
+     * root mean square of the audio buffer
+     * 
+     * @param  AudioBuffer audioBuffer
+     * @return float Quadratic mean
      */
     this.calculateRMS = function ( audioBuffer ) {
   
